@@ -1,0 +1,6 @@
+1) download mysql
+2) setup mysql
+3) run npm i
+4) create a .env file with MYSQL_PASSWORD variable in it
+
+to run: npx nodemon
