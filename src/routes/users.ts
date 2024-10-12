@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import { registerUser, loginUser } from '../controllers/userController';
+import { registerUser, loginUser, logoutUser, refreshAuthToken } from '../controllers/userController';
 import { authenticateToken } from '../middleware/jwtMiddleware';
-import { JwtPayload } from 'jsonwebtoken';
+import { checkBlacklist } from '../middleware/blackList';
 
 const router = express.Router();
 
@@ -32,13 +32,42 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/dashboard', authenticateToken, (req: Request, res: Response) => {
 
-
+router.get('/dashboard', authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
   res.json({ message: `Hello ${req.body.user?.username}, welcome to your dashboard!` });
 });
 
 
+router.post('/refreshAuthToken', checkBlacklist, async (req: Request, res: Response) => {
+  const refreshToken = req.headers['refresh_token'] as string;
 
+  try {
+    const newToken = await refreshAuthToken(refreshToken);
+    if (newToken) {
+      res.json({ token: newToken });
+    } else {
+      res.status(401).json({ error: 'Invalid token' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Error refreshing token' });
+  }
+})
+
+
+router.post('/logout', authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
+  const authToken = req.headers['authorization'] as string;
+  const refreshToken = req.headers['refresh_token'] as string;
+
+  try {
+    const logout = await logoutUser(authToken, refreshToken);
+    if (logout) {
+      res.json({ message: 'User logged out' });
+    } else {
+      res.status(500).json({ error: 'Error logging out' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Error logging out' });
+  }
+})
 
 export default router;
