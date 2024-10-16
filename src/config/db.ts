@@ -24,6 +24,7 @@ export const createTables = async () => {
         CREATE TABLE IF NOT EXISTS blacklist (
         id int unsigned NOT NULL AUTO_INCREMENT,
         token varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+        expiration_date int NOT NULL,
         PRIMARY KEY (id)
         )
     `

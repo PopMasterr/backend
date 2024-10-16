@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 export interface IJwtPayload {
   id: number;
   username: string;
+  exp: number;
 }
 
 export function authenticateToken(req: Request, res: Response, next: NextFunction): void {

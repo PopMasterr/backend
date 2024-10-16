@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db';
 import { RowDataPacket } from 'mysql2';
+import { IJwtPayload } from '../middleware/jwtMiddleware';
 
 interface IUser {
   id: number;
@@ -17,6 +18,11 @@ interface IUserIdAndUsername {
 interface ILoginTokens {
   authToken: string;
   refreshToken: string;
+}
+
+interface IBlacklistedToken {
+  token: string;
+  exp: number;
 }
 
 export async function registerUser(username: string, password: string) {
@@ -56,7 +62,7 @@ export async function loginUser(username: string, password: string): Promise<ILo
 export async function refreshAuthToken(oldRefreshToken: string): Promise<string | null> {
   try {
     const decoded = jwt.verify(oldRefreshToken, process.env.JWT_REFRESH_SECRET as string) as IUserIdAndUsername;
-    
+
     const newAccessToken = jwt.sign(
       { id: decoded.id, username: decoded.username },
       process.env.JWT_SECRET as string,
@@ -69,12 +75,23 @@ export async function refreshAuthToken(oldRefreshToken: string): Promise<string 
   }
 }
 
-export async function logoutUser(authToken: string, refreshToken: string): Promise<boolean> {
+export async function logoutUser(authToken: string, authTokenExp: number, refreshToken: string): Promise<boolean> {
   if (!authToken || !refreshToken) return false;
 
+  let refreshTokenExp: number = -1;
+
+  jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string, (error, decoded) => {
+    if (error || !decoded) {
+      return false;
+    }
+
+    let refreshTokenPayload = decoded as IJwtPayload;
+    refreshTokenExp = refreshTokenPayload.exp;
+  });
+
   try {
-    const query = 'INSERT INTO blacklist (token) VALUES (?),(?)';
-    await pool.query(query, [authToken, refreshToken]);
+    const query = 'INSERT INTO blacklist (token, expiration_date) VALUES (?, ?),(?, ?)';
+    await pool.query(query, [authToken, authTokenExp, refreshToken, refreshTokenExp]);
   } catch (error) {
     console.log(error);
     return false;
@@ -82,3 +99,5 @@ export async function logoutUser(authToken: string, refreshToken: string): Promi
 
   return true;
 }
+
+

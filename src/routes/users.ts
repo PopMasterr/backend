@@ -59,7 +59,7 @@ router.post('/logout', authenticateToken, checkBlacklist, async (req: Request, r
   const refreshToken = req.headers['refresh_token'] as string;
 
   try {
-    const logout = await logoutUser(authToken, refreshToken);
+    const logout = await logoutUser(authToken, req.body.user.exp, refreshToken);
     if (logout) {
       res.json({ message: 'User logged out' });
     } else {
