@@ -5,10 +5,20 @@ import db from "./config/db"
 import { createTables } from './config/db';
 import cleanUpExpiredTokens from './middleware/cleanUpExpiredTokens';
 import cron from "node-cron"
+import cors from "cors"
 
 dotenv.config();
 
 const app = express();
+
+const corsOptions: cors.CorsOptions = {
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, // Allow cookies and credentials (optional)
+};
+
+app.use(cors(corsOptions));
+
 
 app.use(express.json());
 app.use('/api', routes);
