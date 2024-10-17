@@ -1,13 +1,24 @@
 import mysql from 'mysql2/promise';
 import 'dotenv/config';
+import * as url from 'url';
+
+const dbUrl = process.env.JAWSDB_URL || '';
+
+const connectionParams = url.parse(dbUrl);
+const [user, password] = (connectionParams.auth || '').split(':');
+const [host, port] = (connectionParams.host || '').split(':');
+const database = (connectionParams.pathname || '').substring(1); 
+const port2: number = parseInt(port || '3306');
 
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    host: host,
+    user: user,
+    password: password,
+    database: database,
+    port: port2,
     waitForConnections: true,
     connectionLimit: 10,
+    connectTimeout: 10000,
     queueLimit: 0,
 });
 

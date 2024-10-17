@@ -20,11 +20,6 @@ interface ILoginTokens {
   refreshToken: string;
 }
 
-interface IBlacklistedToken {
-  token: string;
-  exp: number;
-}
-
 export async function registerUser(username: string, password: string) {
   const hashedPassword = await bcrypt.hash(password, 10);
 
