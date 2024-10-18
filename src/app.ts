@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 
 const corsOptions: cors.CorsOptions = {
-  origin: true,
+  origin: 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true, // Allow cookies and credentials (optional)
 };
@@ -32,4 +32,9 @@ app.listen(PORT, () => {
 cron.schedule('0 * * * *', async () => {
   await cleanUpExpiredTokens();
   console.log('Expired tokens cleaned up');
+});
+
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
 });
