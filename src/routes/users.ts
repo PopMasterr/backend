@@ -9,8 +9,13 @@ router.post('/register', async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
-    await registerUser(username, password);
-    res.status(201).json({ message: 'User registered' });
+    const validCredentials: Boolean = await registerUser(username, password);
+    if (!validCredentials) {
+      res.status(400).json({ error: 'User already exists' });
+      return;
+    } else {
+      res.status(201).json({ message: 'User registered' });
+    }
   } catch (err) {
     res.status(500).json({ error: 'Error registering user' });
   }
@@ -61,7 +66,7 @@ router.post('/logout', authenticateToken, checkBlacklist, async (req: Request, r
   try {
     const logout = await logoutUser(authToken, req.body.user.exp, refreshToken);
     if (logout) {
-      res.json({ message: 'User logged out' });
+      res.status(200).json({ message: 'User logged out' });
     } else {
       res.status(500).json({ error: 'Error logging out' });
     }

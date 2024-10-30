@@ -1,6 +1,7 @@
 import mysql from 'mysql2/promise';
 import 'dotenv/config';
 import * as url from 'url';
+import { create } from 'domain';
 
 const dbUrl = process.env.JAWSDB_URL || '';
 
@@ -40,8 +41,18 @@ export const createTables = async () => {
         )
     `
 
+    const createImagesTable = `
+        CREATE TABLE IF NOT EXISTS images (
+        id int unsigned NOT NULL AUTO_INCREMENT,
+        user_id int unsigned NOT NULL,
+        url varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+        PRIMARY KEY (id)
+    )
+`
+
     await pool.query(createUsersTable);
     await pool.query(createTokenBlacklist);
+    await pool.query(createImagesTable);
 
     console.log('Tables created');
 }

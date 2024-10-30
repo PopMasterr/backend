@@ -20,11 +20,19 @@ interface ILoginTokens {
   refreshToken: string;
 }
 
-export async function registerUser(username: string, password: string) {
+export async function registerUser(username: string, password: string): Promise<Boolean> {
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-  await pool.query(query, [username, hashedPassword]);
+  const userExistsQuery = 'SELECT * FROM users WHERE username = ?';
+  const [rows] = await pool.query<RowDataPacket[]>(userExistsQuery, [username]);
+
+  if (rows.length > 0) {
+    return false;
+  } else {
+    const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
+    await pool.query(query, [username, hashedPassword]);
+    return true;
+  }
 }
 
 export async function loginUser(username: string, password: string): Promise<ILoginTokens | null> {
