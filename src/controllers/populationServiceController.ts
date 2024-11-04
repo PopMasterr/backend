@@ -10,8 +10,14 @@ interface ICoordinates {
     cy1: number;
     cy2: number;
 }
+
+ export interface IGuessData {
+  population: number;
+  guess: number;
+  score: number;
+}
  
-export async function getPopulation(x1: number, x2: number, y1: number, y2: number): Promise<number | null> {
+export async function getPopulation(x1: number, x2: number, y1: number, y2: number, guess: number): Promise<IGuessData | null> {
   const getPopulationURL = process.env.POPULATION_API_KEY + "/getPopulation";
 
   try {
@@ -20,13 +26,15 @@ export async function getPopulation(x1: number, x2: number, y1: number, y2: numb
         x1,
         x2,
         y1,
-        y2
+        y2,
+        guess
       }
     });
+    console.log(response.data);
     const population: number = response.data.population;
-    return population;
+    const score: number = response.data.score;
+    return {population: population, guess: guess, score: score};
   } catch (error) {
-    console.log(error);
     return null;
   }
 }
@@ -48,7 +56,6 @@ export async function getCoordinates(): Promise<any> {
     };
     return coordinates;
   } catch (error) {
-    console.log(error);
     return null;
   }
 }

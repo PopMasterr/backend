@@ -3,7 +3,7 @@ import { RowDataPacket } from 'mysql2';
 import { bucket } from './../middleware/gcsClient';
 import { v4 as uuidv4 } from 'uuid';
 
-export const uploadImageToGCS = async (file: Express.Multer.File, userId: string): Promise<string> => {
+export const uploadImage = async (file: Express.Multer.File, userId: string): Promise<string> => {
     const uniqueId = uuidv4();
     const fileName = `${uniqueId}_${file.originalname}`;
     const blob = bucket.file(fileName);
