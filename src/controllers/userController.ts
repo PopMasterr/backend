@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import pool from '../config/db';
 import { RowDataPacket } from 'mysql2';
 import { IJwtPayload } from '../middleware/jwtMiddleware';
+import { createUserMetrics } from './userMetricsController';
 
 interface IUser {
   id: number;
@@ -31,6 +32,15 @@ export async function registerUser(username: string, password: string): Promise<
   } else {
     const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
     await pool.query(query, [username, hashedPassword]);
+    const getNewUserQuery = 'SELECT * FROM users WHERE username = ?';
+
+    const [newUserRows] = await pool.query<RowDataPacket[]>(getNewUserQuery, [username]);
+
+    if (newUserRows.length === 0) return false;
+
+    const newUser: IUser = newUserRows[0] as IUser;
+
+    await createUserMetrics(newUser.id);
     return true;
   }
 }
@@ -49,7 +59,7 @@ export async function loginUser(username: string, password: string): Promise<ILo
   const authToken = jwt.sign(
     { id: user.id, username: user.username },
     process.env.JWT_SECRET as string,
-    { expiresIn: '10m' }
+    { expiresIn: '50m' }
   );
 
   const refreshToken = jwt.sign(
@@ -69,7 +79,7 @@ export async function refreshAuthToken(oldRefreshToken: string): Promise<string 
     const newAccessToken = jwt.sign(
       { id: decoded.id, username: decoded.username },
       process.env.JWT_SECRET as string,
-      { expiresIn: '10m' }
+      { expiresIn: '50m' }
     );
 
     return newAccessToken;

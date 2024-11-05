@@ -48,7 +48,30 @@ export const createTables = async () => {
         url varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
         PRIMARY KEY (id)
     )
-`
+    `
+
+    const createAchievemetnsTable = `
+        CREATE TABLE IF NOT EXISTS achievements (
+        id int unsigned NOT NULL AUTO_INCREMENT,
+        name VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+        description TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+        PRIMARY KEY (id)
+    )
+    `
+
+    const createUserMetricsTable = `
+        CREATE TABLE IF NOT EXISTS user_metrics (
+        id int unsigned NOT NULL AUTO_INCREMENT,
+        user_id int unsigned NOT NULL,
+        total_points int unsigned NOT NULL,
+        games_played int unsigned NOT NULL,
+        average_score int unsigned NOT NULL,
+        perfect_guesses int unsigned NOT NULL,
+        highest_streak int unsigned NOT NULL,
+        PRIMARY KEY (id)
+    )
+    `
+
 
     await pool.query(createUsersTable);
     await pool.query(createTokenBlacklist);

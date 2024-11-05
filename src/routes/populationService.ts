@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/getPopulation', authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
   const { x1, x2, y1, y2, guess } = req.query;
+  const userId = req.body.user?.id;
 
   if (!x1 || !x2 || !y1 || !y2) {
     res.status(400).json({ error: 'Missing coordinates' });
@@ -14,7 +15,7 @@ router.get('/getPopulation', authenticateToken, checkBlacklist, async (req: Requ
   }
 
   try {
-    const guessData: IGuessData | null = await getPopulation(Number(x1), Number(x2), Number(y1), Number(y2), Number(guess));
+    const guessData: IGuessData | null = await getPopulation(Number(x1), Number(x2), Number(y1), Number(y2), Number(guess), userId);
     if (guessData) {
       res.json({ guessData });
     } else {

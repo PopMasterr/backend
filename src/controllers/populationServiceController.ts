@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { updateUserMetrics } from './userMetricsController';
 
 interface ICoordinates {
     x1: number;
@@ -17,7 +18,7 @@ interface ICoordinates {
   score: number;
 }
  
-export async function getPopulation(x1: number, x2: number, y1: number, y2: number, guess: number): Promise<IGuessData | null> {
+export async function getPopulation(x1: number, x2: number, y1: number, y2: number, guess: number, userId: number): Promise<IGuessData | null> {
   const getPopulationURL = process.env.POPULATION_API_KEY + "/getPopulation";
 
   try {
@@ -33,6 +34,9 @@ export async function getPopulation(x1: number, x2: number, y1: number, y2: numb
     console.log(response.data);
     const population: number = response.data.population;
     const score: number = response.data.score;
+
+    await updateUserMetrics(userId, score);
+
     return {population: population, guess: guess, score: score};
   } catch (error) {
     return null;
