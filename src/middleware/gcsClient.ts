@@ -1,11 +1,10 @@
 import { Storage } from '@google-cloud/storage';
-import path from 'path';
 
-const serviceAccountPath = path.join(__dirname, './../../googleCloudStorageKey.json');
+const serviceAccount = JSON.parse(process.env.GOOGLE_CLOUD_STORAGE_KEY as string);
 
 const storage = new Storage({
-  keyFilename: serviceAccountPath,
-  projectId: 'data-audio-439714-d9',
+  credentials: serviceAccount,
+  projectId: serviceAccount.project_id,
 });
 
 const bucketName = 'university_project_computer_organisation';

@@ -50,7 +50,7 @@ export const createTables = async () => {
     )
     `
 
-    const createAchievemetnsTable = `
+    const createAchievementsTable = `
         CREATE TABLE IF NOT EXISTS achievements (
         id int unsigned NOT NULL AUTO_INCREMENT,
         name VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
@@ -72,7 +72,8 @@ export const createTables = async () => {
     )
     `
 
-
+    await pool.query(createAchievementsTable);
+    await pool.query(createUserMetricsTable);
     await pool.query(createUsersTable);
     await pool.query(createTokenBlacklist);
     await pool.query(createImagesTable);
