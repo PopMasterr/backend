@@ -24,6 +24,7 @@ export const uploadImage = async (file: Express.Multer.File, userId: string): Pr
         await pool.query(query, [userId, fileName]);
         await blob.makePublic();
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
         return publicUrl;
     } catch (err: any | Error) {
         throw new Error(`Upload error: ${err.message}`);

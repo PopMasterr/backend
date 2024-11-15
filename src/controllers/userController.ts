@@ -26,6 +26,7 @@ export async function registerUser(username: string, password: string): Promise<
 
   const userExistsQuery = 'SELECT * FROM users WHERE username = ?';
   const [rows] = await pool.query<RowDataPacket[]>(userExistsQuery, [username]);
+  console.log(userExistsQuery, username, rows);
 
   if (rows.length > 0) {
     return false;
@@ -65,7 +66,7 @@ export async function loginUser(username: string, password: string): Promise<ILo
   const refreshToken = jwt.sign(
     { id: user.id, username: user.username },
     process.env.JWT_REFRESH_SECRET as string,
-    { expiresIn: '7d' }
+    { expiresIn: '1d' }
   );
 
   return { authToken: authToken, refreshToken: refreshToken } as ILoginTokens;

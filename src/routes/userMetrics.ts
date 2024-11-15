@@ -9,7 +9,15 @@ router.get('/getMetrics', authenticateToken, checkBlacklist, async (req: Request
     const userId = req.body.user?.id;
     try {
         const metrics = await getUserMetricsByUserId(userId);
-        res.status(200).json({ metrics });
+
+        const data = {
+            total_points: metrics?.total_points,
+            games_played: metrics?.games_played,
+            average_score: metrics?.average_score,
+            perfect_guesses: metrics?.perfect_guesses,
+            highest_streak: metrics?.highest_streak,
+        }
+        res.status(200).json({ data });
     } catch (error) {
         res.status(500).json({ error: `Failed to get metrics: ${error}` });
     }

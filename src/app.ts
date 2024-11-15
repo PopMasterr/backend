@@ -11,17 +11,13 @@ dotenv.config();
 
 const app = express();
 
-// const corsOptions: cors.CorsOptions = {
-//   origin: 'http://localhost:3000',
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   credentials: true, // Allow cookies and credentials (optional)
-// };
+const corsOptions: cors.CorsOptions = {
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, // Allow cookies and credentials (optional)
+};
 
-// app.use(cors(corsOptions));
-
-app.use(cors());
-
-
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use('/api', routes);
