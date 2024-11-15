@@ -41,12 +41,9 @@ export const getImageByUserId = async (userId: string): Promise<string[]> => {
 export const updateImageByUserId = async (file: Express.Multer.File, userId: string): Promise<string> => {
     try {
         const queryGetImageUrl = 'SELECT url FROM images WHERE user_id = ?';
-        const queryDeleteImage = 'DELETE FROM images WHERE user_id = ?';
+        const queryUpdateImage = 'UPDATE images SET url = ? WHERE user_id = ?';
 
         const [rows] = await pool.query<RowDataPacket[]>(queryGetImageUrl, [userId]);
-        console.log(rows);
-
-        await pool.query(queryDeleteImage, [userId]);
 
         const fileName = (rows[0] as RowDataPacket).url;
         const blob = bucket.file(fileName as string);
@@ -58,6 +55,8 @@ export const updateImageByUserId = async (file: Express.Multer.File, userId: str
         });
         await blob.makePublic();
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+        await pool.query(queryUpdateImage, [fileName, userId]);
         return publicUrl;
     } catch (err: any | Error) {
         throw new Error('failed to update the image');
