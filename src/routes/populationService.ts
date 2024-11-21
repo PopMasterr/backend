@@ -1,41 +1,53 @@
 import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/jwtMiddleware';
 import { checkBlacklist } from '../middleware/blackList';
-import { getPopulation, getCoordinates, IGuessData } from '../controllers/populationServiceController';
+import { getData, getScore } from '../controllers/populationServiceController';
+import { TClassicGamePort, updateClassicGameByUserId } from '../controllers/classicGamesController';
 
 const router = express.Router();
 
-router.get('/getPopulation', authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
-  const { x1, x2, y1, y2, guess } = req.query;
-  const userId = req.body.user?.id;
-
-  if (!x1 || !x2 || !y1 || !y2) {
-    res.status(400).json({ error: 'Missing coordinates' });
-    return;
-  }
-
+router.get("/getCoordinates", authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
   try {
-    const guessData: IGuessData | null = await getPopulation(Number(x1), Number(x2), Number(y1), Number(y2), Number(guess), userId);
-    if (guessData) {
-      res.json({ guessData });
+    const userId = req.body.user?.id;
+    const data = await getData();
+    let gameData: TClassicGamePort;
+
+    if (data === null) {
+      res.status(404).json({ message: `Data not found` });
     } else {
-      res.status(500).json({ error: 'Error getting population' });
+       gameData = {
+        user_id: userId,
+        population: data.population,
+        x1: data.x1,
+        y1: data.y1,
+        x2: data.x2,
+        y2: data.y2
+      };
+
+      await updateClassicGameByUserId(gameData);
     }
-  } catch (err) {
-    res.status(500).json({ error: 'Error getting population' });
+
+
+    res.status(200).json({ x1: data?.x1, y1: data?.y1, x2: data?.x2, y2: data?.y2 });
+  } catch (error) {
+    res.status(500).json({ message: `Failed to get data ${error}` });
   }
 });
 
-router.get('/getCoordinates', authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
+router.get("/getScore", authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
   try {
-    const coordinates = await getCoordinates();
-    if (coordinates) {
-      res.json({ coordinates });
-    } else {
-      res.status(500).json({ error: 'Error getting coordinates' });
+    const userId = req.body.user?.id;
+    const {guess} = req.query;
+
+    const score = await getScore(Number(guess), userId);
+
+    if (score === null) {
+      res.status(404).json({ message: `Score not found` });
     }
-  } catch (err) {
-    res.status(500).json({ error: 'Error getting coordinates' });
+
+    res.status(200).json({ score });
+  } catch (error) {
+    res.status(500).json({ message: `Failed to get score ${error}` });
   }
 });
 

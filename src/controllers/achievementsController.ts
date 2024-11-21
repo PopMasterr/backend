@@ -1,10 +1,10 @@
 import pool from '../config/db';
 import { RowDataPacket } from 'mysql2';
 
-export const createAchievement = async (name: string, description: string, conditionQuery: string): Promise<boolean> => {
+export const createAchievement = async (name: string, description: string): Promise<boolean> => {
     try {
-        const query = 'INSERT INTO achievements (name, description, condition_query) VALUES (?, ?, ?)';
-        await pool.query(query, [name, description, conditionQuery]);
+        const query = 'INSERT INTO achievements (name, description) VALUES (?, ?)';
+        await pool.query(query, [name, description]);
     
         return true;
     } catch (error: any | Error) {

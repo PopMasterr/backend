@@ -4,6 +4,7 @@ import pool from '../config/db';
 import { RowDataPacket } from 'mysql2';
 import { IJwtPayload } from '../middleware/jwtMiddleware';
 import { createUserMetrics } from './userMetricsController';
+import { createClassicGame } from './classicGamesController';
 
 interface IUser {
   id: number;
@@ -26,7 +27,6 @@ export async function registerUser(username: string, password: string): Promise<
 
   const userExistsQuery = 'SELECT * FROM users WHERE username = ?';
   const [rows] = await pool.query<RowDataPacket[]>(userExistsQuery, [username]);
-  console.log(userExistsQuery, username, rows);
 
   if (rows.length > 0) {
     return false;
@@ -42,6 +42,7 @@ export async function registerUser(username: string, password: string): Promise<
     const newUser: IUser = newUserRows[0] as IUser;
 
     await createUserMetrics(newUser.id);
+    await createClassicGame(newUser.id);
     return true;
   }
 }

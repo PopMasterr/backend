@@ -8,7 +8,7 @@ const dbUrl = process.env.JAWSDB_URL || '';
 const connectionParams = url.parse(dbUrl);
 const [user, password] = (connectionParams.auth || '').split(':');
 const [host, port] = (connectionParams.host || '').split(':');
-const database = (connectionParams.pathname || '').substring(1); 
+const database = (connectionParams.pathname || '').substring(1);
 const port2: number = parseInt(port || '3306');
 
 const pool = mysql.createPool({
@@ -55,7 +55,6 @@ export const createTables = async () => {
             id int unsigned NOT NULL AUTO_INCREMENT,
             name VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
             description varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-            condition_query varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
             PRIMARY KEY (id)
         )
     `
@@ -72,27 +71,84 @@ export const createTables = async () => {
 `
 
     const createUserMetricsTable = `
-        CREATE TABLE IF NOT EXISTS user_metrics (
-            id int unsigned NOT NULL AUTO_INCREMENT,
-            user_id int unsigned NOT NULL,
-            total_points int unsigned NOT NULL,
-            games_played int unsigned NOT NULL,
-            average_score int unsigned NOT NULL,
-            perfect_guesses int unsigned NOT NULL,
-            highest_streak int unsigned NOT NULL,
-            PRIMARY KEY (id),
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )
-    `
+    CREATE TABLE IF NOT EXISTS user_metrics (
+        id int unsigned NOT NULL AUTO_INCREMENT,
+        user_id int unsigned NOT NULL,
+        total_points int unsigned NOT NULL,
+        games_played int unsigned NOT NULL,
+        average_score int unsigned NOT NULL,
+        perfect_guesses int unsigned NOT NULL,
+        highest_streak int unsigned NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+`
+
+    const createGameSessionsTable = `
+    CREATE TABLE IF NOT EXISTS game_sessions (
+        id int unsigned NOT NULL AUTO_INCREMENT,
+        code VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+        host_id int unsigned NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (host_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+`
+
+    const createGameRoundsTable = `
+    CREATE TABLE IF NOT EXISTS game_rounds (
+        id int unsigned NOT NULL AUTO_INCREMENT,
+        game_session_id int unsigned NOT NULL,
+        population int unsigned NOT NULL,
+        x1 double NOT NULL,
+        y1 double NOT NULL,
+        x2 double NOT NULL,
+        y2 double NOT NULL,
+        round_number int unsigned NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (game_session_id) REFERENCES game_sessions(id) ON DELETE CASCADE
+    )
+`
+
+    const createGameScoresTable = `
+    CREATE TABLE IF NOT EXISTS game_scores (
+        id int unsigned NOT NULL AUTO_INCREMENT,
+        user_id int unsigned NOT NULL,
+        game_round_id int unsigned NOT NULL,
+        score int unsigned NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (game_round_id) REFERENCES game_rounds(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+`
+
+    const createClassicGamesTable = `
+    CREATE TABLE IF NOT EXISTS games (
+        id int unsigned NOT NULL AUTO_INCREMENT,
+        user_id int unsigned NOT NULL,
+        population int unsigned NOT NULL,
+        x1 double NOT NULL,
+        y1 double NOT NULL,
+        x2 double NOT NULL,
+        y2 double NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+`
+
 
     await pool.query(createUsersTable);
     await pool.query(createAchievementsTable);
     await pool.query(createUserAchievementsTable);
     await pool.query(createUserMetricsTable);
     await pool.query(createTokenBlacklist);
-    await pool.query(createImagesTable);
+    await pool.query(createGameSessionsTable);
+    await pool.query(createGameRoundsTable);
+    await pool.query(createGameScoresTable);
+    await pool.query(createClassicGamesTable);
 
     console.log('Tables created');
 }
 
 export default pool;
+
+

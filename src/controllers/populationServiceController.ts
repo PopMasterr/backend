@@ -1,64 +1,63 @@
 import axios from 'axios';
 import { updateUserMetrics } from './userMetricsController';
-
-interface ICoordinates {
-    x1: number;
-    x2: number;
-    y1: number;
-    y2: number;
-    cx1: number;
-    cx2: number;
-    cy1: number;
-    cy2: number;
-}
+import pool from '../config/db';
+import { RowDataPacket } from 'mysql2';
 
  export interface IGuessData {
   population: number;
   guess: number;
   score: number;
 }
- 
-export async function getPopulation(x1: number, x2: number, y1: number, y2: number, guess: number, userId: number): Promise<IGuessData | null> {
-  const getPopulationURL = process.env.POPULATION_API_KEY + "/getPopulation";
+
+export type TGameData = {
+  population: number;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
+
+export async function getData(): Promise<TGameData | null> {
+  const getDataURL = process.env.POPULATION_API_KEY + "/getData";
 
   try {
-    const response = await axios.get(getPopulationURL, {
-      params: {
-        x1,
-        x2,
-        y1,
-        y2,
-        guess
-      }
-    });
-    console.log(response.data);
-    const population: number = response.data.population;
-    const score: number = response.data.score;
-
-    await updateUserMetrics(userId, score);
-
-    return {population: population, guess: guess, score: score};
+    const response = await axios.get(getDataURL);
+    const data: TGameData = {
+      population: response.data.population,
+      x1: response.data.x1,
+      x2: response.data.x2,
+      y1: response.data.y1,
+      y2: response.data.y2
+    };
+    return data;
   } catch (error) {
     return null;
   }
 }
 
-export async function getCoordinates(): Promise<any> {
-  const getCoordinatesURL = process.env.POPULATION_API_KEY + "/getCoordinates";
+export async function getScore(populationGuess: number, userId: number): Promise<number | null> {
+  const getScoreURL = process.env.POPULATION_API_KEY + "/getScore";
 
   try {
-    const response = await axios.get(getCoordinatesURL);
-    const coordinates: ICoordinates = {
-      x1: response.data.x1,
-      x2: response.data.x2,
-      y1: response.data.y1,
-      y2: response.data.y2,
-      cx1: response.data.cx1,
-      cx2: response.data.cx2,
-      cy1: response.data.cy1,
-      cy2: response.data.cy2
-    };
-    return coordinates;
+    const query = 'SELECT population FROM games WHERE user_id = ?';
+    const [rows] = await pool.query<RowDataPacket[]>(query, [userId]);
+    
+    if (rows.length === 0) {
+      throw new Error('No population found for the given user ID');
+    }
+
+    const population = rows[0].population;
+    const response = await axios.get(getScoreURL, {
+      params: {
+        guess: populationGuess,
+        population: population
+      }
+    });
+
+    const score = response.data.score;
+    updateUserMetrics(userId, score);
+
+    return score;
   } catch (error) {
     return null;
   }
