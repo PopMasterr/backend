@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/jwtMiddleware';
 import { checkBlacklist } from '../middleware/blackList';
-import { getData, getScore } from '../controllers/populationServiceController';
+import { getData, getScoreAndPopulation, TGameResult } from '../controllers/populationServiceController';
 import { TClassicGamePort, updateClassicGameByUserId } from '../controllers/classicGamesController';
 
 const router = express.Router();
@@ -39,13 +39,13 @@ router.get("/getScore", authenticateToken, checkBlacklist, async (req: Request, 
     const userId = req.body.user?.id;
     const {guess} = req.query;
 
-    const score = await getScore(Number(guess), userId);
+    const data: TGameResult | null = await getScoreAndPopulation(Number(guess), userId);
 
-    if (score === null) {
+    if (data === null) {
       res.status(404).json({ message: `Score not found` });
     }
 
-    res.status(200).json({ score });
+    res.status(200).json({ data });
   } catch (error) {
     res.status(500).json({ message: `Failed to get score ${error}` });
   }

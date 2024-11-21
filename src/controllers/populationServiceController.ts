@@ -17,6 +17,11 @@ export type TGameData = {
   y2: number;
 };
 
+export type TGameResult = {
+  score: number;
+  population: number;
+}
+
 export async function getData(): Promise<TGameData | null> {
   const getDataURL = process.env.POPULATION_API_KEY + "/getData";
 
@@ -35,7 +40,7 @@ export async function getData(): Promise<TGameData | null> {
   }
 }
 
-export async function getScore(populationGuess: number, userId: number): Promise<number | null> {
+export async function getScoreAndPopulation(populationGuess: number, userId: number): Promise<TGameResult | null> {
   const getScoreURL = process.env.POPULATION_API_KEY + "/getScore";
 
   try {
@@ -57,7 +62,12 @@ export async function getScore(populationGuess: number, userId: number): Promise
     const score = response.data.score;
     updateUserMetrics(userId, score);
 
-    return score;
+    const result = {
+      score,
+      population
+    } as TGameResult;
+
+    return result;
   } catch (error) {
     return null;
   }
