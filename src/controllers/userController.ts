@@ -114,5 +114,3 @@ export async function logoutUser(authToken: string, authTokenExp: number, refres
 
   return true;
 }
-
-

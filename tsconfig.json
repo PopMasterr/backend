@@ -10,6 +10,6 @@
     "rootDir": "./src",                     // Specify the root folder for TypeScript source files
     "typeRoots": ["./node_modules/@types", "./types"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/config/dbMigrations.ts", "src/config/db.ts"],
   "exclude": ["node_modules"]
 }

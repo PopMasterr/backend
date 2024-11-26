@@ -2,6 +2,7 @@ import axios from 'axios';
 import { updateUserMetrics } from './userMetricsController';
 import pool from '../config/db';
 import { RowDataPacket } from 'mysql2';
+import { findClassicGameByUserId } from './classicGamesController';
 
  export interface IGuessData {
   population: number;
@@ -44,14 +45,13 @@ export async function getScoreAndPopulation(populationGuess: number, userId: num
   const getScoreURL = process.env.POPULATION_API_KEY + "/getScore";
 
   try {
-    const query = 'SELECT population FROM games WHERE user_id = ?';
-    const [rows] = await pool.query<RowDataPacket[]>(query, [userId]);
-    
-    if (rows.length === 0) {
-      throw new Error('No population found for the given user ID');
+    const classicGame: TGameData | null = await findClassicGameByUserId(userId);
+
+    if (classicGame === null) {
+      throw new Error('Error getting classic game');
     }
 
-    const population = rows[0].population;
+    const population = classicGame.population;
     const response = await axios.get(getScoreURL, {
       params: {
         guess: populationGuess,
@@ -60,7 +60,8 @@ export async function getScoreAndPopulation(populationGuess: number, userId: num
     });
 
     const score = response.data.score;
-    updateUserMetrics(userId, score);
+    await updateUserMetrics(userId, score);
+
 
     const result = {
       score,

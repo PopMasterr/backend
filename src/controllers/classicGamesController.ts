@@ -1,6 +1,7 @@
 import { RowDataPacket } from 'mysql2';
 import pool from '../config/db';
 import { TGameData } from './populationServiceController'; 
+import { createGame, findGame, updateGame } from './gamesController';
 
 
 export type TClassicGamePort = TGameData & {
@@ -13,8 +14,14 @@ export type TClassicGame = TClassicGamePort & {
 
 export async function createClassicGame(userId: number): Promise<boolean | null> {
     try {
-        const query = 'INSERT INTO games (user_id, population, x1, y1, x2, y2) VALUES (?, ?, ?, ?, ?, ?)';
-        await pool.query(query, [userId, 0, 0, 0, 0, 0]);
+        const newClassicGameId = await createGame();
+
+        if (newClassicGameId === null) {
+            throw new Error('Error creating classic game');
+        }
+
+        const query = 'INSERT INTO classic_games (user_id, game_id) VALUES (?, ?)';
+        await pool.query(query, [userId, newClassicGameId]);
 
         return true;
     } catch (error) {
@@ -23,11 +30,16 @@ export async function createClassicGame(userId: number): Promise<boolean | null>
     }
 }
 
-export async function updateClassicGameByUserId(classicGameData: TClassicGamePort): Promise<boolean | null> {
+export async function updateClassicGameByUserId(userId: number): Promise<boolean | null> {
     try {
-        const query = 'UPDATE games SET population = ?, x1 = ?, y1 = ?, x2 = ?, y2 = ? WHERE user_id = ?';
-        await pool.query(query, [classicGameData.population, classicGameData.x1, classicGameData.y1, classicGameData.x2, classicGameData.y2, classicGameData.user_id]);
+        const getGameIdQuery = 'SELECT game_id FROM classic_games WHERE user_id = ?';
+        const gameId: any = await pool.query(getGameIdQuery, userId);
 
+        if (gameId === null) {
+            throw new Error('Error getting game id');
+        }
+
+        await updateGame(gameId[0].game_id);
         return true;
     } catch (error) {
         console.error('Error updating classic game:', error);
@@ -35,17 +47,20 @@ export async function updateClassicGameByUserId(classicGameData: TClassicGamePor
     }
 }
 
-export async function findClassicGameByUserId(userId: number): Promise<number | null> {
+export async function findClassicGameByUserId(userId: number): Promise<TGameData | null> {
     try {
-        const query = 'SELECT * FROM games WHERE user_id = ?';
+        const query = 'SELECT * FROM classic_games WHERE user_id = ?';
 
         const [rows] = await pool.query<RowDataPacket[]>(query, [userId]);
 
         if (!rows) return null;
 
-        const classicGame = rows[0];
 
-        return classicGame.id;
+        const classicGame = rows[0];
+        const classicGameGameId = classicGame.game_id;
+
+        const gameData = await findGame(classicGameGameId);
+        return gameData as TGameData;
     } catch (error) {
         return null;
     }

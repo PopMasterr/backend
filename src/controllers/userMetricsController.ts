@@ -1,5 +1,6 @@
 import pool from '../config/db';
 import { RowDataPacket } from 'mysql2';
+import { addNewUserAchievements } from './userAchievementsController';
 
 interface IUserMetrics {
     user_id: number;
@@ -33,14 +34,21 @@ export async function updateUserMetrics(userId: number, score: number): Promise<
 
     if (!currentUserMetrics) return false;
 
+    const totalPoints = currentUserMetrics.total_points + score;
+    const gamesPlayed = currentUserMetrics.games_played + 1;
+    const averageScore = Math.floor(totalPoints / gamesPlayed);
+    const perfectGuesses = score === 5000 ? currentUserMetrics.perfect_guesses + 1 : currentUserMetrics.perfect_guesses;
+
+
     const query = 'UPDATE user_metrics SET total_points = ?, games_played = ?, average_score = ?, perfect_guesses = ? WHERE user_id = ?';
     await pool.query(query, [
-        currentUserMetrics.total_points + score,
-        currentUserMetrics.games_played + 1,
-        Math.floor((currentUserMetrics.total_points + score) / (currentUserMetrics.games_played + 1)),
-        score === 5000 ? currentUserMetrics.perfect_guesses + 1 : currentUserMetrics.perfect_guesses,
+        totalPoints,
+        gamesPlayed,
+        averageScore,
+        perfectGuesses,
         userId
     ]);
+
+    await addNewUserAchievements(gamesPlayed, perfectGuesses, score, userId);
     return true;
 }
-

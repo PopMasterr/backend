@@ -48,5 +48,3 @@ export async function findGameRoundsByGameSessionId(gameSessionId: number): Prom
         return null;
     }
 }
-
-// delete by session id
