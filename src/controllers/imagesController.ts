@@ -40,8 +40,8 @@ export const getImageByUserId = async (userId: string): Promise<string[]> => {
 
 export const updateImageByUserId = async (file: Express.Multer.File, userId: string): Promise<string> => {
     try {
-        removeImageByUserId(userId);
-        const publicUrl = uploadImage(file, userId);
+        await removeImageByUserId(userId);
+        const publicUrl = await uploadImage(file, userId);
 
         return publicUrl;
     } catch (err: any | Error) {
