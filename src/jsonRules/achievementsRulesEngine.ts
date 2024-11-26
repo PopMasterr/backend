@@ -28,9 +28,9 @@ const bullseye = {
         }]
     },
     event: {
-        type: 'doubleAce',
+        type: 'bullseye',
         params: {
-            message: 'Guess within 1% of the actual population 10 times (10 perfect guesses)',
+            message: 'Guess within 1% of the actual population for the first time',
             achievementId: 2
         }
     }
