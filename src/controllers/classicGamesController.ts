@@ -39,7 +39,7 @@ export async function updateClassicGameByUserId(userId: number): Promise<boolean
             throw new Error('Error getting game id');
         }
 
-        await updateGame(gameId[0].game_id);
+        await updateGame(gameId[0][0].game_id);
         return true;
     } catch (error) {
         console.error('Error updating classic game:', error);
