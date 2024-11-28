@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS game_sessions (
     id int unsigned NOT NULL AUTO_INCREMENT,
     code VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
     host_id int unsigned NOT NULL,
+    number_of_rounds int unsigned NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (host_id) REFERENCES users(id) ON DELETE CASCADE
 )

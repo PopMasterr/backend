@@ -42,8 +42,6 @@ export async function getData(): Promise<TGameData | null> {
 }
 
 export async function getScoreAndPopulation(populationGuess: number, userId: number): Promise<TGameResult | null> {
-  const getScoreURL = process.env.POPULATION_API_KEY + "/getScore";
-
   try {
     const classicGame: TGameData | null = await findClassicGameByUserId(userId);
 
@@ -52,16 +50,13 @@ export async function getScoreAndPopulation(populationGuess: number, userId: num
     }
 
     const population = classicGame.population;
-    const response = await axios.get(getScoreURL, {
-      params: {
-        guess: populationGuess,
-        population: population
-      }
-    });
+    
+    const score = await getScore(populationGuess, population);
+    if (score === null) {
+      throw new Error('Error getting score');
+    }
 
-    const score = response.data.score;
     await updateUserMetrics(userId, score);
-
 
     const result = {
       score,
@@ -69,6 +64,23 @@ export async function getScoreAndPopulation(populationGuess: number, userId: num
     } as TGameResult;
 
     return result;
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function getScore (guess: number, population: number): Promise<number | null> {
+  const getScoreURL = process.env.POPULATION_API_KEY + "/getScore";
+
+  try {
+    const response = await axios.get(getScoreURL, {
+      params: {
+        guess: guess,
+        population: population
+      }
+    });
+
+    return response.data.score;
   } catch (error) {
     return null;
   }

@@ -1,15 +1,19 @@
 import { RowDataPacket } from 'mysql2';
 import pool from '../config/db';
+import { findAllGameRoundsByGameSessionId, findGameRoundsByGameSessionIdUpToRound, getDistinctUsersByGameSessionId } from './gameRoundsController';
+import { findUsernameById } from './userController';
 
 export type TGameScorePort = {
-    user_id: number;
-    game_session_id: number;
+    userId: number;
+    gameRoundId: number;
     score: number;
 };
 
-export async function createGameScore(userId: number, gameSessionId: number, score: number): Promise<boolean | null> {
+// use when getting game round score and population
+export async function createGameScore(gameScorePort: TGameScorePort): Promise<boolean | null> {
     try {
-        const query = 'INSERT INTO classic_games'
+        const query = 'INSERT INTO game_scores (user_id, game_round_id, score) VALUES (?, ?, ?)';
+        await pool.query(query, [gameScorePort.userId, gameScorePort.gameRoundId, gameScorePort.score]);
 
         return true;
     } catch (error) {
@@ -18,37 +22,67 @@ export async function createGameScore(userId: number, gameSessionId: number, sco
     }
 };
 
-export async function findGameScoresByUserIdAndGameSessionId(userId: number, gameSessionId: number): Promise<number[] | null> {
+export async function getAllGameSessionScoresUpToRound(gameSessionId: number, upToRound: number): Promise<Map<string, number> | null> {
     try {
-        const query = 'SELECT * FROM game_scores WHERE user_id = ? AND game_session_id = ?';
-        const [rows] = await pool.query<RowDataPacket[]>(query, [userId, gameSessionId]);
+        const userIds = await getDistinctUsersByGameSessionId(gameSessionId);
+        if (userIds === null) return null;
 
-        if (rows.length === 0) return null;
+        let userScores = new Map<string, number>();
 
-        let gameScoresIds: number[] = [];
+        for (let i = 0; i < userIds.length; i++) {
+            const sumScore = await getSumScoreUpToRound(userIds[i], gameSessionId, upToRound);
+            if (sumScore === null) continue;
 
-        for (let i = 0; i < rows.length; i++) {
-            gameScoresIds.push(rows[i].id);
+            const username = await findUsernameById(userIds[i]);
+            if (username === null) continue;
+
+            userScores.set(username, sumScore);
         }
 
-        return gameScoresIds;
+        return userScores;
     } catch (error) {
-        console.error('Error getting game scores by user id:', error);
+        console.error('Error getting top scores:', error);
         return null;
     }
 };
 
-export async function getSumScoreOfUsersGameSession(userId :number, gameSessionId: number): Promise<number | null> {
+export async function getSumScoreUpToRound(userId: number, gameSessionId: number, upToRound: number): Promise<number | null> {
     try {
-        const query = 'SELECT score FROM game_scores WHERE user_id = ? AND game_session_id = ?';
-        const [rows] = await pool.query<RowDataPacket[]>(query, [userId, gameSessionId]);
+        const gameRoundIds = await findGameRoundsByGameSessionIdUpToRound(gameSessionId, upToRound);
+        if (gameRoundIds === null) return null;
 
-        if (rows.length === 0) return null;
+        const sumScore = await getSumScore(userId, gameRoundIds);
 
-        let sum = 0;
+        return sumScore;
+    } catch (error) {
+        console.error('Error getting sum of user game session up to round:', error);
+        return null;
+    }
+}
 
-        for (let i = 0; i < rows.length; i++) {
-            sum += rows[i].score;
+export async function getSumScoreOfAllRounds(userId: number, gameSessionId: number): Promise<number | null> {
+    try {
+        const gameRoundIds = await findAllGameRoundsByGameSessionId(gameSessionId);
+        if (gameRoundIds === null) return null;
+
+        const sumScore = getSumScore(userId, gameRoundIds);
+
+        return sumScore;
+    } catch (error) {
+        console.error('Error getting sum of user game session up to round:', error);
+        return null
+    }
+}
+
+export async function getSumScore(userId :number, gameRoundIds: number[]): Promise<number | null> {
+    try {
+        let sum: number = 0;
+
+        for (let i = 0; i < gameRoundIds.length; i++) {
+            const { score }: any = await findGameScoresByUserIdAndGameSessionId(userId, gameRoundIds[i]);
+            if (score === null) continue;
+
+            sum += score;
         }
 
         return sum;
@@ -57,3 +91,19 @@ export async function getSumScoreOfUsersGameSession(userId :number, gameSessionI
         return null;
     }
 }
+
+export async function findGameScoresByUserIdAndGameSessionId(userId: number, gameRoundId: number): Promise<number | null> {
+    try {
+        const query = 'SELECT score FROM game_scores WHERE user_id = ? AND game_round_id = ?';
+        const [rows]: any = await pool.query<RowDataPacket[]>(query, [userId, gameRoundId]);
+
+        if (rows.length === 0) return null;
+
+        let score: number = rows[0];
+
+        return score;
+    } catch (error) {
+        console.error('Error getting game scores by user id and gameRoundId:', error);
+        return null;
+    }
+};

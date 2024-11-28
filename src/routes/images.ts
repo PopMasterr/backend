@@ -44,8 +44,6 @@ router.post("/updateImage", upload.single("profilePicture"), authenticateToken, 
     const userId = req.body.user?.id;
     const profilePicture: Express.Multer.File | undefined = req.file;
 
-    console.log(userId);
-
     try {
         if (!profilePicture) {
             res.status(400).send('No file uploaded');

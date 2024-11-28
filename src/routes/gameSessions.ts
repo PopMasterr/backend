@@ -1,38 +1,54 @@
 import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/jwtMiddleware';
 import { checkBlacklist } from '../middleware/blackList';
-import { createGameSession, findGameSessionByCode } from '../controllers/gameSessionsController';
+import { createGameSession, findGameSessionByCode, findGameSessionsByUserId } from '../controllers/gameSessionsController';
 
 const router = express.Router();
 
-router.post("/createGameSession/:numberOfRounds", authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
+router.post("/createGameSession", authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
     try {
-        const numberOfRounds: number = req.body.numberOfRounds;
         const userId = req.body.user?.id;
-        const gameSessionCode: string | null = await createGameSession(userId, numberOfRounds);
+        const numberOfRounds = req.body.numberOfRounds;
+        const gameSessionCode = await createGameSession(userId, numberOfRounds);
 
         if (gameSessionCode === null) {
-            res.status(500).json({ message: `Failed to create a game session` });
+            res.status(404).json({ message: `Game session not created` });
         }
 
-        res.status(200).json({ gameSessionCode: gameSessionCode });
+        res.status(200).json(gameSessionCode);
     } catch (error) {
-        res.status(500).json({ message: `Failed to create a game session ${error}` });
+        res.status(500).json({ message: `Failed to create game session ${error}` });
     }
 });
 
-router.get("/findGameSessionById/:sessionCode", authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
+router.get("/getGameSessionByCode/:code", authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
     try {
-        const gameSession = await findGameSessionByCode(req.params.sessionCode);
+        const code = req.params.code;
+        const gameSessionId = await findGameSessionByCode(code);
 
-        if (gameSession === null) {
+        if (gameSessionId === null) {
             res.status(404).json({ message: `Game session not found` });
         }
 
-        res.status(200).json({ gameSession });
+        res.status(200).json(gameSessionId);
     } catch (error) {
-        res.status(500).json({ message: `Failed to find game session ${error}` });
+        res.status(500).json({ message: `Failed to get game session by code ${error}` });
     }
 });
 
+router.get("/getGameSessionsByUserId", authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
+    try {
+        const userId = req.body.user?.id;
+
+        const gameSessionCodes = await findGameSessionsByUserId(userId);
+
+        if (gameSessionCodes === null) {
+            res.status(404).json({ message: `Game sessions not found` });
+        }
+
+        res.status(200).json(gameSessionCodes);
+    } catch (error) {
+        res.status(500).json({ message: `Failed to get game sessions by user id ${error}` });
+    }
+});
 export default router;

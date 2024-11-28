@@ -114,3 +114,17 @@ export async function logoutUser(authToken: string, authTokenExp: number, refres
 
   return true;
 }
+
+export async function findUsernameById(userId: number): Promise<string | null> {
+  try {
+    const query = 'SELECT username FROM users WHERE id = ?';
+    const [rows] = await pool.query<RowDataPacket[]>(query, [userId]);
+
+    if (rows.length === 0) return null;
+
+    return rows[0].username;
+  } catch (error) {
+    console.error('Error getting username by id:', error);
+    return null;
+  }
+}
