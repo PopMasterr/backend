@@ -65,4 +65,3 @@ export const removeImageByUserId = async (userId: string): Promise<string> => {
         throw new Error('failed to delete the image');
     }
 }
-

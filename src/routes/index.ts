@@ -8,6 +8,7 @@ import userAchievements from "./userAchievements";
 import gameSessions from "./gameSessions";
 import gameRounds from "./gameRounds";
 import gameScores from "./gameScores";
+import streak from "./streak";
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.use("/profileImage", images);
 router.use("/userMetrics", userMetrics);
 
 router.use("/population", populationService);
+router.use("/streak", streak);
 
 router.use("/achievements", achievements);
 router.use("/userAchievements", userAchievements);
@@ -23,6 +25,7 @@ router.use("/userAchievements", userAchievements);
 router.use("/gameSessions", gameSessions);
 router.use("/gameRounds", gameRounds);
 router.use("/gameScores", gameScores);
+
 
 export default router;
 

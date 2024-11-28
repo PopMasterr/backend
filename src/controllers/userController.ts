@@ -5,6 +5,7 @@ import { RowDataPacket } from 'mysql2';
 import { IJwtPayload } from '../middleware/jwtMiddleware';
 import { createUserMetrics } from './userMetricsController';
 import { createClassicGame } from './classicGamesController';
+import { createStreakGame } from './streakController';
 
 interface IUser {
   id: number;
@@ -43,6 +44,7 @@ export async function registerUser(username: string, password: string): Promise<
 
     await createUserMetrics(newUser.id);
     await createClassicGame(newUser.id);
+    await createStreakGame(newUser.id);
     return true;
   }
 }

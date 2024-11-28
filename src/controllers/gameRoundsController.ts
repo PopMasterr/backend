@@ -15,7 +15,7 @@ export type TGameRound = TGameRoundPort & {
     game_id: number;
 }
 
-type TCoordinates = {
+export type TCoordinates = {
     x1: number;
     y1: number;
     x2: number;

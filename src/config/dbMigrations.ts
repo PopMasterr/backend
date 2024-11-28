@@ -130,6 +130,28 @@ CREATE TABLE IF NOT EXISTS games (
 )
 `
 
+const createStreakTable = `
+CREATE TABLE IF NOT EXISTS streak_games (
+    id int unsigned NOT NULL AUTO_INCREMENT,
+    user_id int unsigned NOT NULL,
+    game_id_1 int unsigned NOT NULL,
+    game_id_2 int unsigned NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (game_id_1) REFERENCES games(id) ON DELETE CASCADE,
+    FOREIGN KEY (game_id_2) REFERENCES games(id) ON DELETE CASCADE
+)
+`
+
+const createStreakScoresTable = `
+CREATE TABLE IF NOT EXISTS streak_scores (
+    id int unsigned NOT NULL AUTO_INCREMENT,
+    user_id int unsigned NOT NULL,
+    score int unsigned NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)
+`
 
 export const createTables = async () => {
     try {
@@ -150,6 +172,8 @@ export const createTables = async () => {
     await pool.query(createClassicGamesTable);
     await pool.query(createImagesTable);
     await pool.query(createStreakGameTable);
+    await pool.query(createStreakTable);
+    await pool.query(createStreakScoresTable);
 
     console.log('Tables created');
 }
