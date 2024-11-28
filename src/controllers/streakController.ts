@@ -80,7 +80,7 @@ export async function getAnswerIsCorrectAndScore (userId: number, answer: string
 
         let result: TStreakGameResult;
 
-        if (population1 > population2 && answer === 'blue') {
+        if ((population1 > population2 && answer === 'blue') || (population1 < population2 && answer === 'red')) {
             const score = await increaseStreakScoreByOne(userId);
             if (score === null) throw new Error('No score found');
 
