@@ -3,7 +3,7 @@ import pool from '../config/db';
 import { RowDataPacket } from 'mysql2';
 import { createGame, findGame, updateGame } from './gamesController';
 import { TCoordinates } from './gameRoundsController';
-import { createStreakScore, increaseStreakScoreByOne } from './streakScoreController';
+import { createStreakScore, increaseStreakScoreByOne, resetStreakScore } from './streakScoreController';
 
 export type TStreakGame = {
     userId: number;
@@ -91,6 +91,8 @@ export async function getAnswerIsCorrectAndScore (userId: number, answer: string
                 answerIsCorrect: true
             }
         } else {
+            await resetStreakScore(userId);
+
             result = {
                 population1,
                 population2,
