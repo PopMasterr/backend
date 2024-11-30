@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/jwtMiddleware';
 import { checkBlacklist } from '../middleware/blackList';
-import { createGameSession, findGameSessionByCode, findGameSessionsByUserId } from '../controllers/gameSessionsController';
+import { createGameSession, findGameSessionByCode, findGameSessionsByUserId, getTheNumberOfRounds } from '../controllers/gameSessionsController';
 
 const router = express.Router();
 
@@ -49,6 +49,22 @@ router.get("/getGameSessionsByUserId", authenticateToken, checkBlacklist, async 
         res.status(200).json(gameSessionCodes);
     } catch (error) {
         res.status(500).json({ message: `Failed to get game sessions by user id ${error}` });
+    }
+});
+
+router.get("/getGameSessionsRounds/:gameSessionId", authenticateToken, checkBlacklist, async (req: Request, res: Response) => {
+    try {
+        const gameSessionId = req.params.gameSessionId;
+
+        const numberOfRounds = await getTheNumberOfRounds(Number(gameSessionId));
+
+        if (numberOfRounds === null) {
+            res.status(404).json({ message: `Game session rounds not found` });
+        }
+
+        res.status(200).json(numberOfRounds);
+    } catch (error) {
+        res.status(500).json({ message: `Failed to get game sessions rounds ${error}` });
     }
 });
 export default router;
