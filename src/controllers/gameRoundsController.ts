@@ -125,7 +125,7 @@ export async function getGameRoundPopulationAndScore(userId: number, gameSession
         if (gameData === null) return null     
 
         const population = gameData.population;
-        const score = await getScore(population, populationGuess);
+        const score = await getScore(populationGuess, population);
         if (score === null) return null;
         
         await updateUserMetrics(userId, score);

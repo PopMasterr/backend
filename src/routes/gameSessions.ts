@@ -67,4 +67,5 @@ router.get("/getGameSessionsRounds/:gameSessionId", authenticateToken, checkBlac
         res.status(500).json({ message: `Failed to get game sessions rounds ${error}` });
     }
 });
+
 export default router;
