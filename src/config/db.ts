@@ -12,7 +12,7 @@ import { create } from 'domain';
 // const port2 = parseInt(port || '3306');
 
 const user = process.env.STACKHERO_MYSQL_USER;
-const password = process.env.STACKHERO_MYSQL_PASSWORD;
+const password = process.env.STACKHERO_MYSQL_ROOT_PASSWORD;
 const host = process.env.STACKHERO_MYSQL_HOST;
 const database = process.env.STACKHERO_MYSQL_NAME;
 const port2 = Number(process.env.STACKHERO_MYSQL_PORT);
