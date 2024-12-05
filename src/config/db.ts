@@ -11,11 +11,11 @@ import { create } from 'domain';
 // const database = (connectionParams.pathname || '').substring(1);
 // const port2 = parseInt(port || '3306');
 
-const user = process.env.DB_USER;
-const password = process.env.DB_PASSWORD;
-const host = process.env.DB_HOST;
-const database = process.env.DB_NAME;
-const port2 = Number(process.env.DB_PORT);
+const user = process.env.STACKHERO_MYSQL_USER;
+const password = process.env.STACKHERO_MYSQL_PASSWORD;
+const host = process.env.STACKHERO_MYSQL_HOST;
+const database = process.env.STACKHERO_MYSQL_NAME;
+const port2 = Number(process.env.STACKHERO_MYSQL_PORT);
 
 
 const pool = mysql.createPool({
