@@ -9,6 +9,7 @@ import gameSessions from "./gameSessions";
 import gameRounds from "./gameRounds";
 import gameScores from "./gameScores";
 import streak from "./streak";
+import leaderboards from "./leaderboards";
 
 const router = Router();
 
@@ -25,6 +26,8 @@ router.use("/userAchievements", userAchievements);
 router.use("/gameSessions", gameSessions);
 router.use("/gameRounds", gameRounds);
 router.use("/gameScores", gameScores);
+
+router.use("/leaderboards", leaderboards);
 
 
 export default router;
