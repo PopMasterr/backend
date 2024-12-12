@@ -45,7 +45,28 @@ cron.schedule('0 * * * *', async () => {
   console.log('Expired tokens cleaned up');
 });
 
+
+
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Internal Server Error' });
+    if (res.headersSent) {
+      return next(err);
+  }
+
+  console.error('Error:', err.message); // Log the error for debugging
+
+  res.status(err.status || 500).json({
+      success: false,
+      message: err.message || 'Internal Server Error',
+  });
+});
+
+app.use((req, res) => {
+  res.status(404).json({
+      success: false,
+      message: 'Route not found',
+  });
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
 });
