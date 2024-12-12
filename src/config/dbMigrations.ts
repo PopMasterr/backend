@@ -39,7 +39,6 @@ const createUserAchievementsTable = `
 CREATE TABLE IF NOT EXISTS user_achievements (
     user_id int unsigned NOT NULL,
     achievement_id int unsigned NOT NULL,
-    date_achieved DATETIME NOT NULL,
     PRIMARY KEY (user_id, achievement_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (achievement_id) REFERENCES achievements(id) ON DELETE CASCADE

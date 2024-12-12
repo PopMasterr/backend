@@ -28,4 +28,3 @@ router.use("/gameScores", gameScores);
 
 
 export default router;
-

@@ -17,7 +17,6 @@ const host = process.env.STACKHERO_MYSQL_HOST;
 const database = process.env.STACKHERO_MYSQL_NAME;
 const port2 = Number(process.env.STACKHERO_MYSQL_PORT);
 
-
 const pool = mysql.createPool({
     host: host,
     user: user,
