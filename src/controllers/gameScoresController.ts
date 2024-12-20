@@ -12,6 +12,10 @@ export type TGameScorePort = {
 // use when getting game round score and population
 export async function createGameScore(gameScorePort: TGameScorePort): Promise<boolean | null> {
     try {
+        const alreadyHasGameScore = await chechIfGameScoreExists(gameScorePort.userId, gameScorePort.gameRoundId);
+
+        if (alreadyHasGameScore === true) return null;
+
         const query = 'INSERT INTO game_scores (user_id, game_round_id, score) VALUES (?, ?, ?)';
         await pool.query(query, [gameScorePort.userId, gameScorePort.gameRoundId, gameScorePort.score]);
 
@@ -21,6 +25,20 @@ export async function createGameScore(gameScorePort: TGameScorePort): Promise<bo
         return null;
     }
 };
+
+export async function chechIfGameScoreExists(userId: number, gameRoundId: number): Promise<boolean | null> {
+    try {
+        const query = 'SELECT * FROM game_scores WHERE user_id = ? AND game_round_id = ?';
+        const [rows] = await pool.query<RowDataPacket[]>(query, [userId, gameRoundId]);
+
+        if (rows.length === 0) return false;
+
+        return true;
+    } catch (error) {
+        console.error('Error checking if game score exists:', error);
+        return null;
+    }
+}
 
 export async function getAllGameSessionScoresUpToRound(gameSessionId: number, upToRound: number): Promise<Map<string, number> | null> {
     try {

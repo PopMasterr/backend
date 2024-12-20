@@ -128,8 +128,10 @@ export async function getGameRoundPopulationAndScore(userId: number, gameSession
         const score = await getScore(populationGuess, population);
         if (score === null) return null;
         
-        await updateUserMetrics(userId, score);
-        await createGameScore({ userId: userId, gameRoundId: gameRoundId, score: score });
+        const gameScoreCreated = await createGameScore({ userId: userId, gameRoundId: gameRoundId, score: score });
+        if (gameScoreCreated !== null) {
+            await updateUserMetrics(userId, score);
+        }
 
         return {population: population, score: score} as TGameResult;
     } catch (error) {
