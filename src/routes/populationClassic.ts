@@ -30,6 +30,8 @@ router.get("/getScore", authenticateToken, checkBlacklist, async (req: Request, 
       res.status(404).json({ message: `Score not found` });
     }
 
+    await updateClassicGameByUserId(userId);
+
     res.status(200).json({ data });
   } catch (error) {
     res.status(500).json({ message: `Failed to get score ${error}` });

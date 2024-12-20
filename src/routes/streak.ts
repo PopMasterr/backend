@@ -27,6 +27,8 @@ router.get("/getAnswerIsCorrectAndScore/:answer", authenticateToken, checkBlackl
         const userId = req.body.user?.id;
         const answer = req.params.answer;
 
+        await updateStreakGame(userId);
+
         if (!(answer === 'blue' || answer === 'red')){
             res.status(400).json({ message: `Invalid answer` });
         } 

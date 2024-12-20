@@ -3,7 +3,7 @@ import pool from "./db"
 const createUsersTable = `
     CREATE TABLE IF NOT EXISTS users (
         id int unsigned NOT NULL AUTO_INCREMENT,
-        username varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+        username varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
         password varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
         PRIMARY KEY (id)
     )
